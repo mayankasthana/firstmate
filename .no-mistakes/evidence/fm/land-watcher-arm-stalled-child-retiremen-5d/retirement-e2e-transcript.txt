@@ -1,0 +1,20 @@
+=== 1) launch a real fm-watch-arm.sh; it forks an owned watcher child ===
+arm status: watcher: started pid=97013 (beacon fresh)
+owned watcher pid=97013, beacon: Aug 24 22:03
+=== 2) SIGSTOP the owned watcher: it goes live-but-stalled (stops advancing its beacon) ===
+=== 3) the arm's watchdog notices the stale beacon and retires the group (TERM then KILL) ===
+
+=== arm exit code: 1 ===
+=== arm stdout/stderr (user-visible line): ===
+watcher: started pid=97013 (beacon fresh)
+/Users/mayank.asthana/.no-mistakes/worktrees/573f3d8e9210/01M0T8J1SDGA5XX53PBCYEJJ6P/bin/fm-watch-arm.sh: line 689: 97013 Killed: 9               ( set +m; exec "$WATCH" ) > "$child_out"
+watcher: FAILED - watcher pid=97013 stopped advancing its beacon for 1s; retired the stalled cycle and released stale ownership for bounded recovery
+
+=== recovery state published: state/.watcher-down ===
+pending:downtime:96992.1787589215.o8x68R
+
+=== lifecycle ledger classification: ===
+arm_pid=96992	watcher_pid=97013	origin=started	started_at=1787589207	ended_at=1787589216	exit_code=137	signal=KILL	reason=stale-beacon-retired	beacon_age=4	lock_before=pid:97013|identity:Mon Aug 24 22:03:27 2026     bash /Users/mayank.asthana/.no-mistakes/worktrees/573f3d8e9210/01M0T8J1SDGA5XX53PBCYEJJ6P/bin/fm-watch.sh	lock_after=pid:none|identity:none	successor=none
+
+=== own watcher alive after retirement? ===
+dead (retired)
