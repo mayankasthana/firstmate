@@ -1,0 +1,25 @@
+
+===== S1: retire a wedged owned watcher within a bound (no session restart) =====
+arm confirmed:   watcher: started pid=98848 (beacon fresh)
+owned watcher:   pid=98848 pgid=98848 (arm pid=98831)
+wedge:           SIGSTOP + beacon backdated; beacon age 844391201s vs grace 5s
+--- arm stdout ---
+watcher: started pid=98848 (beacon fresh)
+watcher: FAILED - watcher pid=98848 stopped advancing its beacon for 844391201s; retired the stalled cycle and released stale ownership for bounded recovery
+--- end arm stdout; exit status 1 after 3s ---
+observed state:  watcher 98848 gone; state/.watch.lock absent; state/.watcher-down=pending:downtime:98831.1791056204.zv4700
+ledger row:      arm_pid=98831	watcher_pid=98848	origin=started	started_at=1791056200	ended_at=1791056204	exit_code=137	signal=KILL	reason=stale-beacon-retired	beacon_age=844391204	lock_before=pid:98848|identity:Sun Oct  4 01:06:40 2026     bash /Users/mayank.asthana/.no-mistakes/worktrees/8b811892b67a/01M41DTKVXJHX5NGXKHY70WAZY/bin/fm-watch.sh	lock_after=pid:none|identity:none	successor=none
+RESULT: PASS - wedged owned watcher retired in 3s, ownership released, arm failed loudly
+
+===== S2: the SAME session re-arms and surfaces the accepted downtime =====
+--- arm stdout (exit status 0) ---
+watcher: started pid=99835 (beacon fresh)
+check: rearm-resurface
+--- end arm stdout ---
+RESULT: PASS - same home/session, no restart: the next arm surfaced the downtime and exited 0
+
+===== S3 (adversarial): a healthy owned watcher is NOT retired =====
+arm confirmed:   watcher: started pid=981 (beacon fresh)
+held 14s (grace 5s, retirement bound 3s) with the arm alive; beacon mtime 1791056207 -> 1791056228
+before cleanup:  arm alive=yes, watcher 981 alive=yes
+RESULT: PASS - healthy owned watcher survived the grace window and kept beating

@@ -1,0 +1,22 @@
+
+===== A: a concurrent successor's live lock survives the arm's stale-lock release =====
+arm pid=10710 -> watcher: started pid=10727 (beacon fresh)
+wedge: SIGSTOP owned watcher pid=10727, beacon age 844391247s vs grace 5s
+concurrent successor pid=11341 stole the stale lock while the arm was retiring its child
+state/.watch.lock/pid is now 11341
+--- arm stdout (exit status 1) ---
+watcher: started pid=10727 (beacon fresh)
+watcher: FAILED - watcher pid=10727 stopped advancing its beacon for 844391247s; retired the stalled cycle and released stale ownership for bounded recovery
+--- end arm stdout ---
+after the arm closed: state/.watch.lock/pid=11341 (successor pid=11341)
+RESULT: PASS - the arm retired its own stalled child without touching the successor's lock
+
+===== B: a live steal-mutex holder makes the arm refuse the removal by name =====
+arm pid=11654 -> watcher: started pid=11671 (beacon fresh)
+wedge: SIGSTOP owned watcher pid=11671, beacon age 844391251s vs grace 5s
+foreign steal-mutex holder pid=12287 is live for the whole retirement window
+--- arm stdout (exit status 1) ---
+watcher: started pid=11671 (beacon fresh)
+watcher: FAILED - watcher pid=11671 stopped advancing its beacon for 844391251s; recovery state could not release stale ownership
+--- end arm stdout ---
+RESULT: PASS - with the steal mutex held the arm refused the removal by name and left the lock intact
